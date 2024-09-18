@@ -1,0 +1,4 @@
+r_min, r_max, nodes, mass
+0.0d0, 3.5d0, 600, 1.83d3
+Fconstant, r0
+0.7271774869588037d0, 1.75d0
