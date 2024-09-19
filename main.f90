@@ -16,7 +16,7 @@ program sincdvr
     close(io)
 
     allocate(xmatrix(nodes), vmatrix(nodes), tmatrix(nodes,nodes), kmatrix(nodes), &
-    & hmatrix(nodes,nodes), eigenvalues(nodes), sinpoints(2,5*nodes+1), STAT = memstatus)
+    & hmatrix(nodes,nodes), eigenvalues(nodes), sinpoints(2,5*nodes+1),STAT = memstatus)
     if(memstatus /= 0) then
     stop "*** Not enough memory for allocation***"
     end if
@@ -46,15 +46,21 @@ program sincdvr
 !    end do
 
     !Print the scatter plot of first 4 stationary states.
-     do j=1,4
+    close(io)
+    print*, "Output saved."
+    open(newunit=io, file="plots.txt")
+    if(iostatus /=0) then
+        stop "***Output file error***"
+    end if
+    do j=1,4
         call FunctionPlot(nodes,sinpoints,hmatrix,r_min,r_max,j)
         write(io,*) "Wavefunction of state n=",j
         do i=1, 5*nodes+1
             write(io,*) sinpoints(:,i)
         end do
     end do
+    print*,"Plot saved"
     close(io)
-    print*, "Output saved."
 
     deallocate(xmatrix, kmatrix, vmatrix, tmatrix,eigenvalues,hmatrix, STAT = memstatus)
     if(memstatus /= 0) then
@@ -96,6 +102,7 @@ subroutine DVRpotential(vmatrix,xmatrix,nodes, Fconstant, r0)
     temp = Fconstant*0.5
     do i=1,nodes
         vmatrix(i)= temp * (xmatrix(i)-r0)**2
+        !vmatrix(i) = temp* cosh(xmatrix(i)-r0)
     end do
 return
 end subroutine
@@ -137,6 +144,7 @@ return
 end subroutine
 
 !Plot the nth stationary state wavefunction on 5*nodes grid.
+!Needs H eigenvectors matrix in FBR
 subroutine FunctionPlot(nodes,sinpoints,hmatrix,r_min,r_max,eigen)
     double precision sinpoints(2,5*nodes), hmatrix(nodes,nodes)
     double precision r_min, r_max, length, const1, const2, step, temp
@@ -155,7 +163,6 @@ subroutine FunctionPlot(nodes,sinpoints,hmatrix,r_min,r_max,eigen)
         end do
         sinpoints(2,i) = temp
     end do
-    !sqrt(2/L)* sin(npi(x-rmin)/L)
-
+    !sqrt(2/L)* sin(npi(x-rmin)/L) - basis function of fbr
 return
 end subroutine
